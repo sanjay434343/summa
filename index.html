@@ -3,61 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sequential New Tab Link Loader</title>
+<title>Multi Tab Link Opener</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    padding: 20px;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    padding: 30px;
     max-width: 700px;
     margin: auto;
     color: #333;
   }
   h1 {
     text-align: center;
-    color: #444;
+    color: #222;
+    margin-bottom: 20px;
   }
   label {
     display: block;
-    margin: 10px 0;
+    margin: 12px 0 6px;
     font-weight: bold;
   }
-  textarea, input, button {
+  textarea {
     width: 100%;
     padding: 12px;
-    margin: 8px 0;
-    font-size: 16px;
-    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    font-size: 15px;
+    border: 1px solid #aaa;
     border-radius: 8px;
+    resize: vertical;
+    min-height: 160px;
     box-sizing: border-box;
   }
   button {
-    background: #007bff;
-    color: #fff;
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    font-size: 16px;
     border: none;
-    cursor: pointer;
+    border-radius: 10px;
+    background: #007bff;
+    color: white;
     font-weight: bold;
-    transition: background 0.3s;
+    cursor: pointer;
+    transition: 0.3s ease;
   }
   button:hover {
     background: #0056b3;
   }
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    margin: 12px 0;
-  }
-  .checkbox-group input {
-    width: auto;
-    margin-right: 8px;
+  .info {
+    margin-top: 15px;
+    padding: 12px;
+    background: #fff;
+    border-left: 5px solid #007bff;
+    border-radius: 6px;
+    font-size: 14px;
   }
 </style>
 </head>
 <body>
-  <h1>🔗 Sequential Link Loader</h1>
+  <h1>🔗 Multi Tab Link Opener</h1>
 
   <label for="links">Enter Links (one per line)</label>
-  <textarea id="links" rows="8">
+  <textarea id="links">
 https://tap.tidaltech.com/tasks/3071/jobs/586711
 https://tap.tidaltech.com/tasks/3071/jobs/586710
 https://tap.tidaltech.com/tasks/3071/jobs/586709
@@ -68,49 +76,34 @@ https://tap.tidaltech.com/tasks/3071/jobs/586705
 https://tap.tidaltech.com/tasks/3071/jobs/586704
   </textarea>
 
-  <label for="interval">Interval (seconds between tabs)</label>
-  <input type="number" id="interval" value="5">
+  <button onclick="openLinks()">🚀 Open All Links in Tabs</button>
 
-  <div class="checkbox-group">
-    <input type="checkbox" id="loop">
-    <label for="loop">Loop Forever (keep cycling links endlessly)</label>
+  <div class="info">
+    ✅ Each link will open in its own new tab.<br>
+    ✅ The <b>first link</b> will be opened <b>last</b>.<br>
+    ⚠️ Allow pop-ups in your browser for this to work.
   </div>
 
-  <button onclick="startNavigation()">🚀 Start Opening Links</button>
-
   <script>
-    function startNavigation() {
-      const linksText = document.getElementById('links').value;
-      const interval = parseInt(document.getElementById('interval').value) * 1000;
-      const loop = document.getElementById('loop').checked;
-
+    function openLinks() {
+      let linksText = document.getElementById('links').value;
       let linksArray = linksText.split('\n').filter(link => link.trim() !== '');
+
       if (linksArray.length === 0) {
-        alert('Please enter some links.');
+        alert("⚠️ Please enter some links first.");
         return;
       }
 
-      // move first link to last position
+      // move first link to the end so it opens last
       const first = linksArray.shift();
       linksArray.push(first);
 
-      let index = 0;
+      // open each in its own new tab
+      linksArray.forEach(link => {
+        window.open(link.trim(), "_blank");
+      });
 
-      function openNext() {
-        if (index >= linksArray.length) {
-          if (loop) {
-            index = 0; // restart
-          } else {
-            alert('✅ All links opened in new tabs.');
-            return;
-          }
-        }
-        window.open(linksArray[index], "_blank");
-        index++;
-        setTimeout(openNext, interval);
-      }
-
-      openNext();
+      alert("✅ All links have been opened in new tabs.");
     }
   </script>
 </body>
