@@ -193,7 +193,7 @@
       
       <div style="display: flex; align-items: center; gap: 10px;">
         <label for="delay">Delay (ms):</label>
-        <input type="number" id="delay" class="delay-input" value="100" min="0" max="5000" step="50">
+        <input type="number" id="delay" class="delay-input" value="200" min="0" max="5000" step="50">
       </div>
     </div>
 
@@ -220,7 +220,7 @@ https://tap.tidaltech.com/tasks/3071/jobs/586704</textarea>
       <strong>📋 Instructions:</strong><br>
       • Paste your links in the textarea above (one per line)<br>
       • Choose opening order: Normal (top to bottom) or Reverse (bottom to top)<br>
-      • Set delay between opening tabs (recommended: 100-500ms)<br>
+      • Set delay between opening tabs (recommended: 200-500ms)<br>
       • Click "Open All Links" to launch them in new tabs<br><br>
       <strong>⚠️ Important:</strong> Make sure to allow pop-ups in your browser for this tool to work properly.
     </div>
@@ -264,7 +264,7 @@ https://tap.tidaltech.com/tasks/3071/jobs/586704</textarea>
     function openLinks() {
       const linksText = document.getElementById('links').value;
       const order = document.getElementById('order').value;
-      const delay = parseInt(document.getElementById('delay').value) || 100;
+      const delay = parseInt(document.getElementById('delay').value) || 200;
       
       let linksArray = linksText.split('\n')
         .map(link => link.trim())
@@ -288,23 +288,49 @@ https://tap.tidaltech.com/tasks/3071/jobs/586704</textarea>
       }
 
       // Show processing status
-      showStatus(`🔄 Opening ${linksArray.length} links...`, 'info');
+      showStatus(`🔄 Opening ${linksArray.length} links... Please allow popups if prompted.`, 'info');
 
-      // Open links with delay
+      // Method 1: Try opening all at once first (fastest but may be blocked)
+      let successCount = 0;
       linksArray.forEach((link, index) => {
-        setTimeout(() => {
-          try {
-            window.open(link, '_blank', 'noopener,noreferrer');
-          } catch (error) {
-            console.error(`Failed to open link: ${link}`, error);
+        try {
+          const newWindow = window.open(link, '_blank');
+          if (newWindow) {
+            successCount++;
           }
-        }, index * delay);
+        } catch (error) {
+          console.error(`Failed to open link: ${link}`, error);
+        }
       });
 
-      // Show completion status after all links are processed
+      // If some links failed to open, try with delays
+      if (successCount < linksArray.length) {
+        setTimeout(() => {
+          showStatus(`🔄 Some tabs may be blocked. Trying with delays...`, 'info');
+          
+          linksArray.forEach((link, index) => {
+            setTimeout(() => {
+              try {
+                const newWindow = window.open(link, '_blank');
+                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                  console.warn(`Popup blocked for: ${link}`);
+                }
+              } catch (error) {
+                console.error(`Failed to open link: ${link}`, error);
+              }
+            }, index * delay);
+          });
+        }, 1000);
+      }
+
+      // Show completion status
       setTimeout(() => {
-        showStatus(`✅ Successfully opened ${linksArray.length} links in new tabs!`, 'success');
-      }, linksArray.length * delay + 100);
+        if (successCount === linksArray.length) {
+          showStatus(`✅ Successfully opened all ${linksArray.length} links!`, 'success');
+        } else {
+          showStatus(`⚠️ Opened ${successCount}/${linksArray.length} links. Please allow popups and try again if needed.`, 'error');
+        }
+      }, successCount < linksArray.length ? linksArray.length * delay + 1500 : 500);
     }
     
     function clearLinks() {
