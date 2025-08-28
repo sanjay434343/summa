@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Link Navigator</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+  textarea, input, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+</style>
+</head>
+<body>
+<h1>Auto Link Navigator</h1>
+
+<textarea id="links" rows="8" placeholder="Paste your links here, one per line">
+https://tap.tidaltech.com/tasks/3071/jobs/586711
+https://tap.tidaltech.com/tasks/3071/jobs/586710
+https://tap.tidaltech.com/tasks/3071/jobs/586709
+https://tap.tidaltech.com/tasks/3071/jobs/586708
+https://tap.tidaltech.com/tasks/3071/jobs/586707
+https://tap.tidaltech.com/tasks/3071/jobs/586706
+https://tap.tidaltech.com/tasks/3071/jobs/586705
+https://tap.tidaltech.com/tasks/3071/jobs/586704
+</textarea>
+
+<input type="number" id="interval" placeholder="Interval in seconds" value="5">
+<label><input type="checkbox" id="loop"> Loop continuously</label>
+<button onclick="startNavigation()">Start</button>
+
+<script>
+let currentIndex = 0;
+let linksArray = [];
+let intervalSeconds;
+let loop = false;
+
+function startNavigation() {
+  const linksText = document.getElementById('links').value;
+  intervalSeconds = parseInt(document.getElementById('interval').value) * 1000;
+  loop = document.getElementById('loop').checked;
+
+  linksArray = linksText.split('\n').filter(link => link.trim() !== '');
+  if (linksArray.length === 0) {
+    alert('Please enter some links.');
+    return;
+  }
+
+  currentIndex = 0;
+  navigateNext();
+}
+
+function navigateNext() {
+  if (currentIndex >= linksArray.length) {
+    if (loop) {
+      currentIndex = 0;
+    } else {
+      alert('All links visited.');
+      return;
+    }
+  }
+
+  // Navigate the browser tab to the next link
+  window.location.href = linksArray[currentIndex];
+
+  // Increment for next navigation
+  currentIndex++;
+
+  // Schedule next navigation
+  setTimeout(navigateNext, intervalSeconds);
+}
+</script>
+</body>
+</html>
