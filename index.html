@@ -3,16 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Link Navigator</title>
+<title>Sequential New Tab Link Loader</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
-  textarea, input, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    padding: 20px;
+    max-width: 700px;
+    margin: auto;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #444;
+  }
+  label {
+    display: block;
+    margin: 10px 0;
+    font-weight: bold;
+  }
+  textarea, input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+  }
+  .checkbox-group input {
+    width: auto;
+    margin-right: 8px;
+  }
 </style>
 </head>
 <body>
-<h1>Auto Link Navigator</h1>
+  <h1>🔗 Sequential Link Loader</h1>
 
-<textarea id="links" rows="8" placeholder="Paste your links here, one per line">
+  <label for="links">Enter Links (one per line)</label>
+  <textarea id="links" rows="8">
 https://tap.tidaltech.com/tasks/3071/jobs/586711
 https://tap.tidaltech.com/tasks/3071/jobs/586710
 https://tap.tidaltech.com/tasks/3071/jobs/586709
@@ -21,52 +66,52 @@ https://tap.tidaltech.com/tasks/3071/jobs/586707
 https://tap.tidaltech.com/tasks/3071/jobs/586706
 https://tap.tidaltech.com/tasks/3071/jobs/586705
 https://tap.tidaltech.com/tasks/3071/jobs/586704
-</textarea>
+  </textarea>
 
-<input type="number" id="interval" placeholder="Interval in seconds" value="5">
-<label><input type="checkbox" id="loop"> Loop continuously</label>
-<button onclick="startNavigation()">Start</button>
+  <label for="interval">Interval (seconds between tabs)</label>
+  <input type="number" id="interval" value="5">
 
-<script>
-let currentIndex = 0;
-let linksArray = [];
-let intervalSeconds;
-let loop = false;
+  <div class="checkbox-group">
+    <input type="checkbox" id="loop">
+    <label for="loop">Loop Forever (keep cycling links endlessly)</label>
+  </div>
 
-function startNavigation() {
-  const linksText = document.getElementById('links').value;
-  intervalSeconds = parseInt(document.getElementById('interval').value) * 1000;
-  loop = document.getElementById('loop').checked;
+  <button onclick="startNavigation()">🚀 Start Opening Links</button>
 
-  linksArray = linksText.split('\n').filter(link => link.trim() !== '');
-  if (linksArray.length === 0) {
-    alert('Please enter some links.');
-    return;
-  }
+  <script>
+    function startNavigation() {
+      const linksText = document.getElementById('links').value;
+      const interval = parseInt(document.getElementById('interval').value) * 1000;
+      const loop = document.getElementById('loop').checked;
 
-  currentIndex = 0;
-  navigateNext();
-}
+      let linksArray = linksText.split('\n').filter(link => link.trim() !== '');
+      if (linksArray.length === 0) {
+        alert('Please enter some links.');
+        return;
+      }
 
-function navigateNext() {
-  if (currentIndex >= linksArray.length) {
-    if (loop) {
-      currentIndex = 0;
-    } else {
-      alert('All links visited.');
-      return;
+      // move first link to last position
+      const first = linksArray.shift();
+      linksArray.push(first);
+
+      let index = 0;
+
+      function openNext() {
+        if (index >= linksArray.length) {
+          if (loop) {
+            index = 0; // restart
+          } else {
+            alert('✅ All links opened in new tabs.');
+            return;
+          }
+        }
+        window.open(linksArray[index], "_blank");
+        index++;
+        setTimeout(openNext, interval);
+      }
+
+      openNext();
     }
-  }
-
-  // Navigate the browser tab to the next link
-  window.location.href = linksArray[currentIndex];
-
-  // Increment for next navigation
-  currentIndex++;
-
-  // Schedule next navigation
-  setTimeout(navigateNext, intervalSeconds);
-}
-</script>
+  </script>
 </body>
 </html>
