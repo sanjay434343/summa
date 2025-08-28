@@ -7,104 +7,324 @@
 <style>
   body {
     font-family: "Segoe UI", Tahoma, sans-serif;
-    background: linear-gradient(135deg, #e0eafc, #cfdef3);
-    padding: 30px;
-    max-width: 700px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    max-width: 800px;
     margin: auto;
     color: #333;
+    min-height: 100vh;
   }
+  
+  .container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+  }
+  
   h1 {
     text-align: center;
-    color: #222;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    font-weight: 300;
+  }
+  
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 15px;
     margin-bottom: 20px;
+    align-items: center;
   }
+  
   label {
-    display: block;
-    margin: 12px 0 6px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #34495e;
+    margin: 0;
   }
+  
+  .delay-input {
+    padding: 8px 12px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    width: 80px;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .order-select {
+    padding: 8px 12px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+  }
+  
   textarea {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    font-size: 15px;
-    border: 1px solid #aaa;
-    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 2px solid #e0e6ed;
+    border-radius: 12px;
     resize: vertical;
-    min-height: 160px;
+    min-height: 200px;
     box-sizing: border-box;
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+    transition: border-color 0.3s ease;
   }
+  
+  textarea:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  
+  .button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
   button {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
+    padding: 15px 25px;
     font-size: 16px;
     border: none;
-    border-radius: 10px;
-    background: #007bff;
-    color: white;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 600;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
+  
+  .btn-primary {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+    color: white;
+  }
+  
   button:hover {
-    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   }
+  
+  button:active {
+    transform: translateY(0);
+  }
+  
   .info {
-    margin-top: 15px;
-    padding: 12px;
-    background: #fff;
-    border-left: 5px solid #007bff;
-    border-radius: 6px;
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    border-left: 5px solid #3498db;
+    border-radius: 12px;
     font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .status {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+    display: none;
+  }
+  
+  .status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  .status.info {
+    background: #cce7ff;
+    color: #004085;
+    border: 1px solid #b3d7ff;
+  }
+  
+  .link-count {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #6c757d;
+  }
+  
+  @media (max-width: 600px) {
+    .controls {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    
+    .button-group {
+      grid-template-columns: 1fr;
+    }
+    
+    .container {
+      padding: 20px;
+    }
   }
 </style>
 </head>
 <body>
-  <h1>🔗 Multi Tab Link Opener</h1>
+  <div class="container">
+    <h1>🔗 Multi Tab Link Opener</h1>
 
-  <label for="links">Enter Links (one per line)</label>
-  <textarea id="links">
-https://tap.tidaltech.com/tasks/3071/jobs/586711
+    <div class="controls">
+      <label for="order">Opening Order:</label>
+      <select id="order" class="order-select">
+        <option value="normal">Normal (Top to Bottom)</option>
+        <option value="reverse">Reverse (Bottom to Top)</option>
+      </select>
+      
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="delay">Delay (ms):</label>
+        <input type="number" id="delay" class="delay-input" value="100" min="0" max="5000" step="50">
+      </div>
+    </div>
+
+    <label for="links">Enter Links (one per line)</label>
+    <textarea id="links" placeholder="Paste your links here, one per line...">https://tap.tidaltech.com/tasks/3071/jobs/586711
 https://tap.tidaltech.com/tasks/3071/jobs/586710
 https://tap.tidaltech.com/tasks/3071/jobs/586709
 https://tap.tidaltech.com/tasks/3071/jobs/586708
 https://tap.tidaltech.com/tasks/3071/jobs/586707
 https://tap.tidaltech.com/tasks/3071/jobs/586706
 https://tap.tidaltech.com/tasks/3071/jobs/586705
-https://tap.tidaltech.com/tasks/3071/jobs/586704
-  </textarea>
+https://tap.tidaltech.com/tasks/3071/jobs/586704</textarea>
 
-  <button onclick="openLinks()">🚀 Open All Links in Tabs</button>
+    <div class="link-count" id="linkCount">8 links ready</div>
 
-  <div class="info">
-    ✅ Each link will open in its own new tab.<br>
-    ✅ The <b>first link</b> will be opened <b>last</b>.<br>
-    ⚠️ Allow pop-ups in your browser for this to work.
+    <div class="button-group">
+      <button class="btn-primary" onclick="openLinks()">🚀 Open All Links</button>
+      <button class="btn-secondary" onclick="clearLinks()">🗑️ Clear All</button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="info">
+      <strong>📋 Instructions:</strong><br>
+      • Paste your links in the textarea above (one per line)<br>
+      • Choose opening order: Normal (top to bottom) or Reverse (bottom to top)<br>
+      • Set delay between opening tabs (recommended: 100-500ms)<br>
+      • Click "Open All Links" to launch them in new tabs<br><br>
+      <strong>⚠️ Important:</strong> Make sure to allow pop-ups in your browser for this tool to work properly.
+    </div>
   </div>
 
   <script>
+    // Update link count when textarea changes
+    document.getElementById('links').addEventListener('input', updateLinkCount);
+    
+    function updateLinkCount() {
+      const linksText = document.getElementById('links').value;
+      const linksArray = linksText.split('\n').filter(link => link.trim() !== '');
+      const count = linksArray.length;
+      document.getElementById('linkCount').textContent = 
+        count === 0 ? 'No links entered' : 
+        count === 1 ? '1 link ready' : 
+        `${count} links ready`;
+    }
+    
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      statusDiv.style.display = 'block';
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
+    }
+    
+    function validateUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    
     function openLinks() {
-      let linksText = document.getElementById('links').value;
-      let linksArray = linksText.split('\n').filter(link => link.trim() !== '');
+      const linksText = document.getElementById('links').value;
+      const order = document.getElementById('order').value;
+      const delay = parseInt(document.getElementById('delay').value) || 100;
+      
+      let linksArray = linksText.split('\n')
+        .map(link => link.trim())
+        .filter(link => link !== '');
 
       if (linksArray.length === 0) {
-        alert("⚠️ Please enter some links first.");
+        showStatus("⚠️ Please enter some links first.", 'error');
         return;
       }
 
-      // move first link to the end so it opens last
-      const first = linksArray.shift();
-      linksArray.push(first);
+      // Validate URLs
+      const invalidLinks = linksArray.filter(link => !validateUrl(link));
+      if (invalidLinks.length > 0) {
+        showStatus(`⚠️ Found ${invalidLinks.length} invalid URL(s). Please check your links.`, 'error');
+        return;
+      }
 
-      // open each in its own new tab
-      linksArray.forEach(link => {
-        window.open(link.trim(), "_blank");
+      // Apply ordering
+      if (order === 'reverse') {
+        linksArray.reverse();
+      }
+
+      // Show processing status
+      showStatus(`🔄 Opening ${linksArray.length} links...`, 'info');
+
+      // Open links with delay
+      linksArray.forEach((link, index) => {
+        setTimeout(() => {
+          try {
+            window.open(link, '_blank', 'noopener,noreferrer');
+          } catch (error) {
+            console.error(`Failed to open link: ${link}`, error);
+          }
+        }, index * delay);
       });
 
-      alert("✅ All links have been opened in new tabs.");
+      // Show completion status after all links are processed
+      setTimeout(() => {
+        showStatus(`✅ Successfully opened ${linksArray.length} links in new tabs!`, 'success');
+      }, linksArray.length * delay + 100);
     }
+    
+    function clearLinks() {
+      if (confirm('Are you sure you want to clear all links?')) {
+        document.getElementById('links').value = '';
+        updateLinkCount();
+        showStatus('🗑️ All links cleared.', 'info');
+      }
+    }
+    
+    // Initialize link count on page load
+    updateLinkCount();
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        openLinks();
+      }
+    });
   </script>
 </body>
 </html>
